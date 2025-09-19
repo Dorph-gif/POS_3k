@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <changeSet id="1" author="your_name">
+        <comment>Create users table</comment>
+        <createTable tableName="users">
+            <column name="user_id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="telegram_id" type="BIGINT">
+                <constraints unique="true" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="your_name">
+        <comment>Create links table</comment>
+        <createTable tableName="links">
+            <column name="link_id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="url" type="VARCHAR(2048)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_checked_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE links ADD CONSTRAINT links_type_check CHECK (type IN ('stackoverflow', 'github'));
+        </sql>
+    </changeSet>
+
+    <changeSet id="3" author="your_name">
+        <comment>Create subscriptions table</comment>
+        <createTable tableName="subscriptions">
+            <column name="subscription_id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_subscriptions_users" references="users(user_id)"/>
+            </column>
+            <column name="link_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_subscriptions_links" references="links(link_id)"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="your_name">
+        <comment>Create updates table</comment>
+        <createTable tableName="updates">
+            <column name="update_id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="link_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_updates_links" references="links(link_id)"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="user_name" type="VARCHAR(255)"/>
+            <column name="preview" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="your_name">
+        <comment>Add indexes</comment>
+        <createIndex tableName="subscriptions" indexName="idx_subscriptions_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="subscriptions" indexName="idx_subscriptions_link_id">
+            <column name="link_id"/>
+        </createIndex>
+        <createIndex tableName="updates" indexName="idx_updates_link_id">
+            <column name="link_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
